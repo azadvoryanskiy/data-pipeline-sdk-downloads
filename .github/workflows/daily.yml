@@ -1,0 +1,62 @@
+name: Daily pipeline
+
+on:
+  schedule:
+    - cron: "0 7 * * *"        # every morning, 07:00 UTC
+  workflow_dispatch:            # and by hand
+
+permissions:
+  contents: write               # commit the landed CSV files
+  pages: write
+  id-token: write
+
+concurrency:
+  group: daily-pipeline
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: pip install -r requirements.txt
+
+      - name: Extract the last 14 days from npm and PyPI
+        run: python pipeline/extract.py
+
+      # Landed data is kept even if the tests below fail: raw is a record of
+      # what the APIs said, and tomorrow's run rewrites these days anyway.
+      - name: Commit the landed files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/raw
+          git diff --cached --quiet || git commit -m "Land downloads up to $(date -u -d yesterday +%F)"
+          git push
+
+      # Any failing test stops the job here, so the dashboard keeps yesterday's
+      # numbers instead of showing broken ones.
+      - name: Build and test with dbt
+        env:
+          DO_NOT_TRACK: "1"
+        run: dbt build --profiles-dir .
+
+      - name: Export the dashboard data
+        run: python pipeline/export.py
+
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+      - id: deploy
+        uses: actions/deploy-pages@v5

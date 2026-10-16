@@ -1,0 +1,9 @@
+# Built on every run, never committed. The landed CSVs in data/raw are.
+/data/warehouse.duckdb*
+/site/data/
+/target/
+/logs/
+/dbt_packages/
+.user.yml
+__pycache__/
+.DS_Store

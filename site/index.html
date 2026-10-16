@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Developer Tool Adoption</title>
+  <meta name="description" content="Daily downloads of 40 SaaS SDKs from npm and PyPI, refreshed every morning by a dbt pipeline on GitHub Actions.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b; --card: #141417; --line: rgba(255,255,255,0.08);
+      --ink: #f5f5f4; --soft: #d4d4d8; --muted: #8b8b93; --accent: #ff6a3d;
+      --good: #22c55e; --warn: #fab219;
+      --head: "Space Grotesk", system-ui, sans-serif; --body: "Inter", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.55 var(--body); }
+    main { max-width: 1200px; margin: 0 auto; padding: 40px 24px 64px; }
+    .eyebrow { color: var(--accent); font: 600 12px/1 var(--body); letter-spacing: .08em; text-transform: uppercase; }
+    h1 { font: 700 clamp(30px, 5vw, 44px)/1.1 var(--head); margin: 12px 0 10px; letter-spacing: -0.01em; }
+    h2 { font: 600 19px/1.3 var(--head); margin: 0 0 4px; }
+    .lede { color: var(--muted); max-width: 760px; margin: 0 0 22px; font-size: 16px; }
+    .status { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
+    .pill { display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border: 1px solid var(--line);
+            border-radius: 999px; background: var(--card); color: var(--soft); font-size: 13px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--good); }
+    .dot.warn { background: var(--warn); }
+    .grid { display: grid; gap: 16px; }
+    .kpis { grid-template-columns: repeat(4, 1fr); margin-bottom: 16px; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 20px 22px; }
+    .kpi .label { color: var(--muted); font: 600 11px/1 var(--body); letter-spacing: .08em; text-transform: uppercase; }
+    .kpi .value { font: 600 32px/1.1 var(--head); margin-top: 10px; }
+    .kpi .note { color: var(--muted); font-size: 13px; margin-top: 4px; }
+    .sub { color: var(--muted); font-size: 13.5px; margin: 0 0 10px; }
+    .two { grid-template-columns: 1fr 1fr; }
+    .chart { width: 100%; height: 420px; }
+    .chart.tall { height: 560px; }
+    .tabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 4px; }
+    .tabs button { background: transparent; color: var(--soft); border: 1px solid var(--line); border-radius: 999px;
+                   padding: 6px 12px; font: 500 13px var(--body); cursor: pointer; }
+    .tabs button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #111; }
+    .steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 12px; }
+    .step { border: 1px solid var(--line); border-radius: 14px; padding: 14px; position: relative; }
+    .step b { display: block; font: 600 14px var(--head); margin-bottom: 4px; }
+    .step span { color: var(--muted); font-size: 13px; }
+    .step .n { color: var(--accent); font: 600 12px var(--body); margin-bottom: 6px; display: block; }
+    footer { color: var(--muted); font-size: 13px; margin-top: 28px; }
+    footer a, .lede a { color: var(--soft); }
+    @media (max-width: 860px) {
+      .kpis { grid-template-columns: repeat(2, 1fr); }
+      .two, .steps { grid-template-columns: 1fr; }
+      .chart.tall { height: 640px; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">Data engineering · daily pipeline</div>
+  <h1>Which developer tools are growing?</h1>
+  <p class="lede">Daily downloads of 40 SDKs from 22 SaaS products on npm and PyPI. A GitHub Actions job
+    fetches them every morning, dbt models and tests them, and this page is rebuilt only if every
+    blocking test passes. <a href="https://github.com/azadvoryanskiy/data-pipeline-sdk-downloads">Code on GitHub</a>.</p>
+
+  <div class="status" id="status"></div>
+
+  <section class="grid kpis" id="kpis"></section>
+
+  <section class="grid two">
+    <div class="card">
+      <h2>Momentum: the last three weeks against the three before</h2>
+      <p class="sub" id="growth-sub"></p>
+      <div class="chart tall" id="growth"></div>
+    </div>
+    <div class="card">
+      <h2>Weekly downloads by category</h2>
+      <p class="sub">Average downloads per day, each week. Pick a category.</p>
+      <div class="tabs" id="tabs" role="group" aria-label="Category"></div>
+      <div class="chart tall" id="weekly"></div>
+    </div>
+  </section>
+
+  <section class="card" style="margin-top:16px">
+    <h2>What the pipeline caught</h2>
+    <p class="sub" id="quality-sub">Total npm downloads per day for all 18 npm packages, as the API sent them and after cleaning.</p>
+    <div class="chart" id="quality"></div>
+  </section>
+
+  <section class="card" style="margin-top:16px">
+    <h2>How it works</h2>
+    <div class="steps">
+      <div class="step"><span class="n">1 · EXTRACT</span><b>GitHub Actions, 07:00 UTC</b><span>Fetches the last 14 days from both APIs, with pauses and retries for rate limits.</span></div>
+      <div class="step"><span class="n">2 · LAND</span><b>One CSV per source per day</b><span>Committed to the repo. Re-running overwrites the same days, so it is safe to repeat.</span></div>
+      <div class="step"><span class="n">3 · MODEL</span><b>dbt on DuckDB</b><span>Staging, then a model that flags missing days and dropouts, then the marts.</span></div>
+      <div class="step"><span class="n">4 · TEST</span><b id="test-count">dbt tests</b><span>Uniqueness, gaps, unknown packages, freshness. A failure stops the deploy.</span></div>
+      <div class="step"><span class="n">5 · PUBLISH</span><b>This page</b><span>Reads one JSON file exported from the marts and goes up on GitHub Pages.</span></div>
+    </div>
+  </section>
+
+  <footer>Downloads count installs, including automated builds, so they show momentum, not customers.
+    Sources: <a href="https://github.com/npm/registry/blob/main/docs/download-counts.md">npm download counts</a>,
+    <a href="https://pypistats.org">pypistats.org</a> (mirrors excluded). Built by Artem Zadvoryanskiy.</footer>
+</main>
+<script src="vendor/echarts.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

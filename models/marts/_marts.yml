@@ -1,0 +1,49 @@
+version: 2
+
+models:
+  - name: fct_downloads_daily
+    description: One row per package per day, raw and cleaned, with a 7-day average.
+    tests:
+      - unique_combination_of_columns:
+          arguments:
+            columns: [source, package, day]
+    columns:
+      - name: product
+        tests: [not_null]
+      - name: category
+        tests:
+          - accepted_values:
+              arguments:
+                values: [Product analytics, Warehouses and databases, Data pipelines,
+                         AI APIs, Payments and messaging, Backend and monitoring]
+
+  - name: product_weekly
+    description: Average daily downloads per product per complete week, npm and PyPI added.
+    tests:
+      - unique_combination_of_columns:
+          arguments:
+            columns: [product, week]
+    columns:
+      - name: avg_daily_downloads
+        tests: [not_null, non_negative]
+
+  - name: product_growth
+    description: Latest three complete weeks against the three before, never across a counting change.
+    columns:
+      - name: product
+        tests: [unique, not_null]
+
+  - name: pipeline_health
+    description: Freshness and flag counts per source.
+    columns:
+      - name: source
+        tests: [unique, not_null]
+
+  - name: int_source_breaks
+    description: Weeks when every package of a source dropped at once and stayed down.
+    columns:
+      - name: source
+        tests:
+          - accepted_values:
+              arguments:
+                values: [npm, pypi]

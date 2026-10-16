@@ -1,0 +1,58 @@
+version: 2
+
+models:
+  - name: stg_npm__downloads
+    description: npm downloads, one row per package per day.
+    tests:
+      - unique_combination_of_columns:
+          arguments:
+            columns: [package, day]
+      - no_missing_dates:
+          arguments:
+            group_by: package
+            date_column: day
+    columns:
+      - name: source
+        tests:
+          - accepted_values:
+              arguments:
+                values: [npm]
+      - name: package
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('packages')
+                field: package
+      - name: day
+        tests: [not_null]
+      - name: downloads
+        tests: [not_null, non_negative]
+
+  - name: stg_pypi__downloads
+    description: PyPI downloads without mirrors, one row per package per day.
+    tests:
+      - unique_combination_of_columns:
+          arguments:
+            columns: [package, day]
+      - no_missing_dates:
+          arguments:
+            group_by: package
+            date_column: day
+    columns:
+      - name: source
+        tests:
+          - accepted_values:
+              arguments:
+                values: [pypi]
+      - name: package
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('packages')
+                field: package
+      - name: day
+        tests: [not_null]
+      - name: downloads
+        tests: [not_null, non_negative]

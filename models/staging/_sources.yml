@@ -1,0 +1,16 @@
+version: 2
+
+sources:
+  - name: raw
+    description: >
+      CSV files landed by pipeline/extract.py, one per source per download day.
+      Each run rewrites the last 14 days, so a file holds the latest answer the
+      API gave for that day.
+    meta:
+      # types are set in the staging models; braces here would clash with {name}
+      external_location: "read_csv('data/raw/{name}/*.csv', header = true, all_varchar = true)"
+    tables:
+      - name: npm
+        description: Daily downloads from the npm registry API (api.npmjs.org).
+      - name: pypi
+        description: Daily downloads from pypistats.org, mirrors excluded.

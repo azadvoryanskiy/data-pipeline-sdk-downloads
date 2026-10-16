@@ -1,0 +1,28 @@
+name: sdk_downloads
+version: "1.0.0"
+config-version: 2
+profile: sdk_downloads
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+target-path: "target"
+clean-targets: ["target", "logs"]
+
+models:
+  sdk_downloads:
+    staging:
+      +materialized: view
+    intermediate:
+      +materialized: table
+    marts:
+      +materialized: table
+
+seeds:
+  sdk_downloads:
+    packages:
+      +column_types:
+        source: varchar
+        package: varchar
+        product: varchar
+        category: varchar

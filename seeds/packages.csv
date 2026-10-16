@@ -1,0 +1,41 @@
+source,package,product,category
+npm,mixpanel-browser,Mixpanel,Product analytics
+pypi,mixpanel,Mixpanel,Product analytics
+npm,@amplitude/analytics-browser,Amplitude,Product analytics
+pypi,amplitude-analytics,Amplitude,Product analytics
+npm,posthog-js,PostHog,Product analytics
+pypi,posthog,PostHog,Product analytics
+npm,@segment/analytics-next,Segment,Product analytics
+pypi,segment-analytics-python,Segment,Product analytics
+npm,snowflake-sdk,Snowflake,Warehouses and databases
+pypi,snowflake-connector-python,Snowflake,Warehouses and databases
+npm,@google-cloud/bigquery,BigQuery,Warehouses and databases
+pypi,google-cloud-bigquery,BigQuery,Warehouses and databases
+npm,@databricks/sql,Databricks,Warehouses and databases
+pypi,databricks-sql-connector,Databricks,Warehouses and databases
+npm,@clickhouse/client,ClickHouse,Warehouses and databases
+pypi,clickhouse-connect,ClickHouse,Warehouses and databases
+npm,@duckdb/node-api,DuckDB,Warehouses and databases
+pypi,duckdb,DuckDB,Warehouses and databases
+pypi,dbt-core,dbt,Data pipelines
+pypi,apache-airflow,Airflow,Data pipelines
+pypi,dagster,Dagster,Data pipelines
+pypi,prefect,Prefect,Data pipelines
+npm,openai,OpenAI,AI APIs
+pypi,openai,OpenAI,AI APIs
+npm,@anthropic-ai/sdk,Anthropic,AI APIs
+pypi,anthropic,Anthropic,AI APIs
+npm,stripe,Stripe,Payments and messaging
+pypi,stripe,Stripe,Payments and messaging
+npm,twilio,Twilio,Payments and messaging
+pypi,twilio,Twilio,Payments and messaging
+npm,@sendgrid/mail,SendGrid,Payments and messaging
+pypi,sendgrid,SendGrid,Payments and messaging
+npm,@supabase/supabase-js,Supabase,Backend and monitoring
+pypi,supabase,Supabase,Backend and monitoring
+npm,firebase,Firebase,Backend and monitoring
+pypi,firebase-admin,Firebase,Backend and monitoring
+npm,@sentry/node,Sentry,Backend and monitoring
+pypi,sentry-sdk,Sentry,Backend and monitoring
+npm,dd-trace,Datadog,Backend and monitoring
+pypi,ddtrace,Datadog,Backend and monitoring
