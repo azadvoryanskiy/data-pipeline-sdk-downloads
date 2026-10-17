@@ -5,53 +5,60 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Developer Tool Adoption</title>
   <meta name="description" content="Daily downloads of 40 SaaS SDKs from npm and PyPI, refreshed every morning by a dbt pipeline on GitHub Actions.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
+    /* Colours and type from the portfolio's design system: ink, one volt signal,
+       Unbounded for headings, Onest for text, Doto for big numbers. Fonts are
+       self-hosted in fonts/ under the SIL Open Font License. */
+    @font-face { font-family: "Unbounded"; src: url("fonts/unbounded-latin-wght-normal.woff2") format("woff2"); font-weight: 200 900; font-display: swap; }
+    @font-face { font-family: "Onest"; src: url("fonts/onest-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+    @font-face { font-family: "Doto"; src: url("fonts/doto-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
     :root {
-      --bg: #09090b; --card: #141417; --line: rgba(255,255,255,0.08);
-      --ink: #f5f5f4; --soft: #d4d4d8; --muted: #8b8b93; --accent: #ff6a3d;
-      --good: #22c55e; --warn: #fab219;
-      --head: "Space Grotesk", system-ui, sans-serif; --body: "Inter", system-ui, sans-serif;
+      --bg: #0A0A0A; --card: #151515; --line: #2A2A2A;
+      --ink: #FFFFFF; --soft: #D4D4CF; --muted: #8C8C87; --accent: #D6FA50;
+      --good: #D6FA50; --warn: #FF5A36;
+      --head: "Unbounded", "Arial Black", sans-serif; --body: "Onest", "Helvetica Neue", Arial, sans-serif;
+      --data: "Doto", "Courier New", monospace;
     }
     * { box-sizing: border-box; }
-    body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.55 var(--body); }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.55 var(--body); -webkit-font-smoothing: antialiased; }
     main { max-width: 1200px; margin: 0 auto; padding: 40px 24px 64px; }
-    .eyebrow { color: var(--accent); font: 600 12px/1 var(--body); letter-spacing: .08em; text-transform: uppercase; }
-    h1 { font: 700 clamp(30px, 5vw, 44px)/1.1 var(--head); margin: 12px 0 10px; letter-spacing: -0.01em; }
-    h2 { font: 600 19px/1.3 var(--head); margin: 0 0 4px; }
+    .eyebrow { color: var(--accent); font: 500 12px/1 var(--body); letter-spacing: .08em; text-transform: uppercase; }
+    h1 { font: 700 clamp(28px, 4.2vw, 42px)/1.05 var(--head); margin: 14px 0 12px; letter-spacing: -0.02em; }
+    h2 { font: 600 19px/1.3 var(--body); margin: 0 0 4px; letter-spacing: -0.01em; }
     .lede { color: var(--muted); max-width: 760px; margin: 0 0 22px; font-size: 16px; }
     .status { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
-    .pill { display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border: 1px solid var(--line);
-            border-radius: 999px; background: var(--card); color: var(--soft); font-size: 13px; }
+    .pill { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 14px; box-shadow: inset 0 0 0 1px var(--line);
+            border-radius: 999px; color: var(--soft); font-size: 13px; }
     .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--good); }
     .dot.warn { background: var(--warn); }
     .grid { display: grid; gap: 16px; }
     .kpis { grid-template-columns: repeat(4, 1fr); margin-bottom: 16px; }
-    .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 20px 22px; }
-    .kpi .label { color: var(--muted); font: 600 11px/1 var(--body); letter-spacing: .08em; text-transform: uppercase; }
-    .kpi .value { font: 600 32px/1.1 var(--head); margin-top: 10px; }
-    .kpi .note { color: var(--muted); font-size: 13px; margin-top: 4px; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 24px; padding: 22px 24px; }
+    .kpi .label { color: var(--muted); font: 500 12px/1.25 var(--body); letter-spacing: .08em; text-transform: uppercase; }
+    .kpi .value { font: 800 48px/0.9 var(--data); color: var(--accent); letter-spacing: -0.02em; margin-top: 16px; }
+    .kpi .note { color: var(--muted); font-size: 13px; margin-top: 10px; }
     .sub { color: var(--muted); font-size: 13.5px; margin: 0 0 10px; }
     .two { grid-template-columns: 1fr 1fr; }
     .chart { width: 100%; height: 420px; }
     .chart.tall { height: 560px; }
     .tabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 4px; }
-    .tabs button { background: transparent; color: var(--soft); border: 1px solid var(--line); border-radius: 999px;
-                   padding: 6px 12px; font: 500 13px var(--body); cursor: pointer; }
-    .tabs button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #111; }
+    .tabs button { background: transparent; color: var(--soft); border: 0; box-shadow: inset 0 0 0 1px var(--line); border-radius: 999px;
+                   height: 32px; padding: 0 14px; font: 500 12px var(--body); letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
+    .tabs button:hover { box-shadow: inset 0 0 0 1px var(--muted); }
+    .tabs button[aria-pressed="true"] { background: var(--accent); box-shadow: none; color: var(--bg); }
     .steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 12px; }
-    .step { border: 1px solid var(--line); border-radius: 14px; padding: 14px; position: relative; }
-    .step b { display: block; font: 600 14px var(--head); margin-bottom: 4px; }
+    .step { border-top: 1px solid var(--line); padding: 14px 4px 4px; position: relative; }
+    .step b { display: block; font: 600 15px/1.3 var(--body); margin-bottom: 6px; }
     .step span { color: var(--muted); font-size: 13px; }
-    .step .n { color: var(--accent); font: 600 12px var(--body); margin-bottom: 6px; display: block; }
+    .step .n { color: var(--accent); font: 500 12px var(--body); letter-spacing: .08em; margin-bottom: 8px; display: block; }
     footer { color: var(--muted); font-size: 13px; margin-top: 28px; }
     footer a, .lede a { color: var(--soft); }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
     @media (max-width: 860px) {
       .kpis { grid-template-columns: repeat(2, 1fr); }
       .two, .steps { grid-template-columns: 1fr; }
       .chart.tall { height: 640px; }
+      .kpi .value { font-size: 40px; }
     }
   </style>
 </head>

@@ -1,15 +1,21 @@
 // Renders the dashboard from data/dashboard.json, the one file the pipeline exports.
 
+// The portfolio's palette: volt for what to look at, white and greys for the rest.
+// Lines that share a colour are told apart by dashes.
 const C = {
-  ink: "#f5f5f4", soft: "#d4d4d8", muted: "#8b8b93", grid: "rgba(255,255,255,0.07)",
-  accent: "#ff6a3d", dim: "#52525b",
-  series: ["#3987e5", "#ff6a3d", "#199e70", "#c98500", "#9085e9"],
+  ink: "#FFFFFF", soft: "#D4D4CF", muted: "#8C8C87", grid: "#2A2A2A",
+  accent: "#D6FA50", dim: "#4A4A47",
+  series: [
+    { color: "#D6FA50", type: "solid" }, { color: "#FFFFFF", type: "solid" }, { color: "#8C8C87", type: "solid" },
+    { color: "#D6FA50", type: [6, 4] }, { color: "#FFFFFF", type: [6, 4] },
+  ],
 };
+const FONT = "Onest";
 const fmtDay = (iso) => new Date(iso + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
 const fmtNum = (n) => n >= 1e6 ? (n / 1e6).toFixed(1) + "M" : n >= 1e3 ? Math.round(n / 1e3) + "K" : String(Math.round(n));
 const pct = (x) => (x > 0 ? "+" : "") + (x * 100).toFixed(0) + "%";
-const axisText = { color: C.muted, fontFamily: "Inter", fontSize: 11 };
-const tooltip = { backgroundColor: "#1c1c20", borderColor: "rgba(255,255,255,0.12)", textStyle: { color: C.ink, fontFamily: "Inter", fontSize: 12 } };
+const axisText = { color: C.muted, fontFamily: FONT, fontSize: 11 };
+const tooltip = { backgroundColor: "#151515", borderColor: "#2A2A2A", textStyle: { color: C.ink, fontFamily: FONT, fontSize: 12 } };
 const charts = [];
 
 function chart(id) {
@@ -59,7 +65,7 @@ function growth(d) {
   const span = (from, to) => `${fmtDay(day(last, from))} – ${fmtDay(day(last, to))}`;
   document.getElementById("growth-sub").textContent =
     `Average daily downloads, npm and PyPI added: ${span(-14, 6)} against ${span(-35, -15)}. ` +
-    `Orange = faster than the typical tool (${pct(median)}). Both windows sit after the PyPI counting change.`;
+    `Lime = faster than the typical tool (${pct(median)}). Both windows sit after the PyPI counting change.`;
   chart("growth").setOption({
     grid: { left: 92, right: 48, top: 8, bottom: 24 },
     tooltip: { ...tooltip, trigger: "item", formatter: (p) => {
@@ -73,7 +79,7 @@ function growth(d) {
       type: "bar", barWidth: 12,
       data: rows.map((r) => ({ value: r.growth, itemStyle: { color: r.growth > median ? C.accent : C.dim,
                                                             borderRadius: r.growth >= 0 ? [0, 4, 4, 0] : [4, 0, 0, 4] } })),
-      label: { show: true, position: "right", color: C.soft, fontFamily: "Inter", fontSize: 11, formatter: (p) => pct(p.value) },
+      label: { show: true, position: "right", color: C.soft, fontFamily: FONT, fontSize: 11, formatter: (p) => pct(p.value) },
     }],
   });
 }
@@ -89,17 +95,18 @@ function weekly(d) {
     const products = Object.entries(d.weekly).filter(([, s]) => s.category === category)
       .sort((a, b) => b[1].points.at(-1)[1] - a[1].points.at(-1)[1]);
     c.setOption({
-      color: C.series,
+      color: C.series.map((s) => s.color),
       grid: { left: 56, right: 18, top: 62, bottom: 30 },
-      legend: { top: 0, left: 0, textStyle: { color: C.soft, fontFamily: "Inter", fontSize: 12 }, icon: "roundRect", itemWidth: 12, itemHeight: 4, itemGap: 18 },
+      legend: { top: 0, left: 0, textStyle: { color: C.soft, fontFamily: FONT, fontSize: 12 }, itemWidth: 24, itemHeight: 10, itemGap: 18 },
       tooltip: { ...tooltip, trigger: "axis", valueFormatter: (v) => fmtNum(v) + " a day" },
       xAxis: { type: "time", axisLabel: axisText, axisLine: { lineStyle: { color: C.grid } }, splitLine: { show: false } },
       yAxis: { type: "value", axisLabel: { ...axisText, formatter: fmtNum }, splitLine: { lineStyle: { color: C.grid } } },
       series: products.map(([name, s], i) => ({
-        name, type: "line", data: s.points, showSymbol: false, lineStyle: { width: 2 },
+        name, type: "line", data: s.points, symbol: "none",
+        lineStyle: { width: 2, color: C.series[i].color, type: C.series[i].type }, itemStyle: { color: C.series[i].color },
         markLine: i === 0 && breakWeek ? {
           silent: true, symbol: "none", lineStyle: { color: C.muted, type: "dashed", width: 1 },
-          label: { color: C.muted, fontFamily: "Inter", fontSize: 11, formatter: "PyPI changed its counting", position: "end" },
+          label: { color: C.muted, fontFamily: FONT, fontSize: 11, formatter: "PyPI changed its counting", position: "end" },
           data: [{ xAxis: breakWeek }],
         } : undefined,
       })),
@@ -118,21 +125,21 @@ function quality(d) {
   const lost = flagged.filter((x) => x.day < lastComplete).length;
   const notYet = flagged.length - lost;
   document.getElementById("quality-sub").textContent =
-    `Total downloads per day across the 18 npm packages, last 90 days. Grey is what the API sent; orange is what the ` +
+    `Total downloads per day across the 18 npm packages, last 90 days. Grey is what the API sent; lime is what the ` +
     `marts use. On ${lost} days npm lost the data and every package read 0; the last ${notYet} days npm hasn't published ` +
     `yet. The pipeline flags both instead of counting a crash, and refetches the recent days every morning.`;
   chart("quality").setOption({
     grid: { left: 56, right: 18, top: 36, bottom: 30 },
-    legend: { top: 0, left: 0, textStyle: { color: C.soft, fontFamily: "Inter", fontSize: 12 }, icon: "roundRect", itemWidth: 12, itemHeight: 4, itemGap: 18 },
+    legend: { top: 0, left: 0, textStyle: { color: C.soft, fontFamily: FONT, fontSize: 12 }, icon: "path://M0,0H12V3H0Z", itemWidth: 12, itemHeight: 4, itemGap: 18 },
     tooltip: { ...tooltip, trigger: "axis", valueFormatter: (v) => (v === null || v === undefined ? "flagged" : fmtNum(v)) },
     xAxis: { type: "time", axisLabel: axisText, axisLine: { lineStyle: { color: C.grid } } },
     yAxis: { type: "value", axisLabel: { ...axisText, formatter: fmtNum }, splitLine: { lineStyle: { color: C.grid } } },
     series: [
       { name: "As the API sent it", type: "line", data: days.map((x) => [x.day, x.raw]), showSymbol: false,
-        lineStyle: { width: 1.5, color: C.dim }, itemStyle: { color: C.dim } },
+        lineStyle: { width: 1.5, color: C.muted }, itemStyle: { color: C.muted } },
       { name: "After the pipeline's checks", type: "line", data: days.map((x) => [x.day, x.clean]), showSymbol: false,
         connectNulls: false, lineStyle: { width: 2, color: C.accent }, itemStyle: { color: C.accent },
-        markArea: { silent: true, itemStyle: { color: "rgba(255,106,61,0.08)" },
+        markArea: { silent: true, itemStyle: { color: "rgba(214,250,80,0.10)" },
                     data: flagged.map((x) => [{ xAxis: x.day }, { xAxis: x.day }]) } },
     ],
   });
